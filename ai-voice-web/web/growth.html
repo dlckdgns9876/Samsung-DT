@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <title>초보 육아 웹 – 성장/건강</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        :root {
+            --brand: #2563eb;
+            --danger: #f97316;
+            --text: #111827;
+            --muted: #6b7280;
+            --bg: #ffffff;
+            --card: #ffffff;
+            --line: #e5e7eb;
+            --shadow: 0 8px 24px rgba(0, 0, 0, .06);
+            --radius: 16px;
+            --max: 1120px
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        /* 링크 리셋 + 네비 색상/활성화 */
+        a,
+        a:visited {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .nav {
+            display: flex;
+            gap: 16px;
+            color: #4b5563;
+        }
+
+        .nav a.active {
+            color: var(--brand);
+            font-weight: 600;
+        }
+
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Apple SD Gothic Neo, Noto Sans KR, sans-serif
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        .container {
+            max-width: var(--max);
+            margin: 0 auto;
+            padding: 0 20px
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, .85);
+            backdrop-filter: saturate(180%) blur(10px);
+            border-bottom: 1px solid var(--line)
+        }
+
+        .header-inner {
+            height: 56px;
+            display: flex;
+            gap: 20px;
+            align-items: center
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 18px
+        }
+
+        .nav {
+            display: flex;
+            gap: 16px;
+            color: #4b5563
+        }
+
+        .nav a.active {
+            color: var(--brand);
+            font-weight: 600
+        }
+
+        .auth {
+            margin-left: auto;
+            display: flex;
+            gap: 12px;
+            color: #374151
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--line);
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: #f9fafb;
+            cursor: pointer
+        }
+
+        .btn.primary {
+            border-color: transparent;
+            background: var(--brand);
+            color: #fff
+        }
+
+        .btn.ghost {
+            background: #fff
+        }
+
+        main {
+            padding: 28px 0 120px
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px
+        }
+
+        @media (min-width:900px) {
+            .grid {
+                grid-template-columns: 1.2fr .8fr
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow)
+        }
+
+        .card h3 {
+            margin: 0 0 10px;
+            font-size: 15px
+        }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        .input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fff
+        }
+
+        .seg {
+            display: inline-flex;
+            background: #f3f4f6;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 4px
+        }
+
+        .seg button {
+            border: none;
+            background: transparent;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #374151
+        }
+
+        .seg button.active {
+            background: #fff;
+            border: 1px solid var(--line);
+            color: var(--text)
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        .table th,
+        .table td {
+            border-bottom: 1px solid var(--line);
+            padding: 8px 6px;
+            text-align: left
+        }
+
+        .hint {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .preview-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .badge {
+            font-size: 11px;
+            background: #eef2ff;
+            border: 1px solid var(--line);
+            padding: 4px 8px;
+            border-radius: 999px;
+            color: #374151
+        }
+
+        .footer {
+            border-top: 1px solid var(--line);
+            padding: 24px 0;
+            color: #6b7280
+        }
+
+        .tooltip {
+            position: absolute;
+            pointer-events: none;
+            background: #111827;
+            color: #fff;
+            font-size: 12px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            transform: translate(-50%, -120%);
+            white-space: nowrap;
+            opacity: 0;
+            transition: .12s
+        }
+    </style>
+</head>
+
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container header-inner">
+            <a class="brand" href="/">초보 육아 웹</a>
+            <nav class="nav">
+                <a href="/" data-page="home" data-nav="primary">홈</a>
+                <a href="/tts" data-page="tts" data-nav="primary">동화</a>
+
+                <!-- 홈 내부 섹션은 앵커만 유지 -->
+                <a href="/#behaviors">행동사전</a>
+                <a href="/#routines">루틴</a>
+
+                <a href="/growth" data-page="growth" data-nav="primary">성장/건강</a>
+                <a href="/#community">커뮤니티</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="container">
+        <!-- Hero -->
+        <section class="card" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+            <div>
+                <h2 style="margin:0 0 6px;font-size:26px;line-height:1.2">성장/건강 기록</h2>
+                <div class="muted">체중·키·머리둘레를 기록하고 그래프로 확인하세요. (로컬 저장)</div>
+            </div>
+            <div class="badge" id="lastSaved">마지막 저장: -</div>
+        </section>
+
+        <section class="grid">
+            <!-- 그래프 -->
+            <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                    <h3>그래프</h3>
+                    <div class="seg" role="tablist" aria-label="지표 선택">
+                        <button id="tab-weight" class="active" data-metric="weight">체중(kg)</button>
+                        <button id="tab-height" data-metric="height">키(cm)</button>
+                        <button id="tab-head" data-metric="head">머리둘레(cm)</button>
+                    </div>
+                </div>
+                <div style="position:relative">
+                    <canvas id="chart" style="width:100%;height:320px;border-radius:12px;background:#fff"></canvas>
+                    <div id="tooltip" class="tooltip"></div>
+                </div>
+                <div style="margin-top:12px" class="preview-wrap">
+                    <img id="previewImg" alt="홈 미리보기 썸네일"
+                        style="height:56px;border:1px solid var(--line);border-radius:10px;background:#f8fafc" />
+                    <div class="hint">그래프가 그려질 때마다 <strong>홈 </strong> 썸네일을 자동 생성
+                    </div>
+                </div>
+                <canvas id="previewCanvas" width="560" height="100" style="display:none"></canvas>
+            </div>
+
+            <!-- 기록 추가 / 데이터 -->
+            <div class="card">
+                <h3>기록 추가</h3>
+                <div class="row">
+                    <input id="dateInput" type="date" class="input" style="flex:1 0 140px" />
+                    <input id="wInput" type="number" step="0.01" placeholder="체중(kg)" class="input"
+                        style="flex:1 0 120px" />
+                    <input id="hInput" type="number" step="0.1" placeholder="키(cm)" class="input"
+                        style="flex:1 0 120px" />
+                    <input id="hdInput" type="number" step="0.1" placeholder="머리둘레(cm)" class="input"
+                        style="flex:1 0 120px" />
+                    <button class="btn primary" id="addBtn">추가</button>
+                </div>
+                <div style="margin-top:14px" class="row">
+                    <button class="btn" id="exportBtn">JSON 내보내기</button>
+                    <label class="btn">
+                        JSON 불러오기<input id="importFile" type="file" accept="application/json" style="display:none">
+                    </label>
+                    <button class="btn" id="clearBtn">전체 초기화</button>
+                </div>
+            </div>
+
+            <!-- 표 -->
+            <div class="card" style="grid-column:1 / -1">
+                <h3>기록표</h3>
+                <table class="table" id="dataTable" aria-describedby="표 설명">
+                    <thead>
+                        <tr>
+                            <th style="width:140px">날짜</th>
+                            <th>체중(kg)</th>
+                            <th>키(cm)</th>
+                            <th>머리둘레(cm)</th>
+                            <th style="width:80px">삭제</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div class="hint">* 최근 날짜가 위에 오도록 정렬됩니다.</div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container muted">© 2025 육아 도래(이) · All Rights Reserved.</div>
+    </footer>
+
+    <script>
+        /***********************
+         * 유틸 & 스토리지
+         ************************/
+        const LS_KEY = 'growth_records_v1';
+        const PREVIEW_KEY = 'growth_preview_png';
+        const PREVIEW_META_KEY = 'growth_preview_meta';
+
+        const fmt = (n, d = 2) => (n ?? '').toString() === '' ? '' : Number(n).toFixed(d);
+        const todayStr = () => new Date().toISOString().slice(0, 10);
+
+        function seed8weeks() {
+            // 최근 8주 시드(임의 데이터)
+            const base = new Date(); base.setDate(base.getDate() - 7 * 7);
+            const rows = [];
+            let w = 6.2, h = 62.0, head = 40.5;
+            for (let i = 0; i < 8; i++) {
+                const d = new Date(base); d.setDate(base.getDate() + i * 7);
+                w += (Math.random() * 0.25 + 0.05);
+                h += (Math.random() * 0.6 + 0.2);
+                head += (Math.random() * 0.15 + 0.03);
+                rows.push({ date: d.toISOString().slice(0, 10), weight: +w.toFixed(2), height: +h.toFixed(1), head: +head.toFixed(1) });
+            }
+            return rows;
+        }
+
+        function load() {
+            try {
+                const raw = localStorage.getItem(LS_KEY);
+                if (!raw) return seed8weeks();
+                const arr = JSON.parse(raw);
+                if (!Array.isArray(arr)) return seed8weeks();
+                return arr.map(r => ({
+                    date: r.date, weight: num(r.weight), height: num(r.height), head: num(r.head)
+                }));
+            } catch (e) { return seed8weeks(); }
+        }
+        function save(rows) {
+            localStorage.setItem(LS_KEY, JSON.stringify(rows));
+            document.getElementById('lastSaved').textContent = '마지막 저장: ' + new Date().toLocaleString();
+        }
+        const num = v => (v === '' || v == null) ? null : Number(v);
+
+        /***********************
+         * 상태
+         ************************/
+        let rows = load();          // [{date, weight, height, head}]
+        let metric = 'weight';      // weight | height | head
+
+        /***********************
+         * DOM 참조
+         ************************/
+        const dateInput = document.getElementById('dateInput');
+        const wInput = document.getElementById('wInput');
+        const hInput = document.getElementById('hInput');
+        const hdInput = document.getElementById('hdInput');
+        const addBtn = document.getElementById('addBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const importFile = document.getElementById('importFile');
+        const clearBtn = document.getElementById('clearBtn');
+        const dataTable = document.getElementById('dataTable').querySelector('tbody');
+        const chart = document.getElementById('chart');
+        const tooltip = document.getElementById('tooltip');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const previewImg = document.getElementById('previewImg');
+
+        // 초기 날짜
+        dateInput.value = todayStr();
+
+        /***********************
+         * 테이블 렌더
+         ************************/
+        function renderTable() {
+            // 최신 날짜가 위로 오게 정렬
+            rows.sort((a, b) => a.date < b.date ? 1 : -1);
+            dataTable.innerHTML = rows.map((r, i) => `
+        <tr>
+          <td>${r.date}</td>
+          <td>${fmt(r.weight)}</td>
+          <td>${fmt(r.height, 1)}</td>
+          <td>${fmt(r.head, 1)}</td>
+          <td><button class="btn" data-del="${i}">삭제</button></td>
+        </tr>
+      `).join('');
+            // 삭제 핸들러
+            dataTable.querySelectorAll('button[data-del]').forEach(btn => {
+                btn.onclick = () => {
+                    const idx = Number(btn.getAttribute('data-del'));
+                    rows.splice(idx, 1);
+                    save(rows); renderTable(); drawAll();
+                }
+            });
+        }
+
+        /***********************
+         * 차트 렌더 (Canvas)
+         ************************/
+        function drawAll() {
+            drawChart(chart, rows, metric);
+            drawPreviewAndSave(rows, metric);
+        }
+
+        function getDataForMetric(rows, metric) {
+            return rows
+                .filter(r => r[metric] != null)
+                .slice().sort((a, b) => a.date > b.date ? 1 : -1)
+                .map(r => ({ x: new Date(r.date).getTime(), y: Number(r[metric]), date: r.date }));
+        }
+
+        function drawChart(canvas, rows, metric) {
+            const data = getDataForMetric(rows, metric);
+            const ctx = canvas.getContext('2d');
+            const cssW = canvas.clientWidth, cssH = 320;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = cssW * dpr; canvas.height = cssH * dpr; canvas.style.height = cssH + 'px';
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, cssW, cssH);
+
+            const pad = { l: 44, r: 16, t: 16, b: 28 };
+            const W = cssW - pad.l - pad.r, H = cssH - pad.t - pad.b;
+
+            // 배경
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, cssW, cssH);
+
+            if (data.length === 0) {
+                ctx.fillStyle = '#6b7280'; ctx.fillText('데이터가 없습니다.', pad.l, pad.t + 20);
+                return;
+            }
+
+            // X/Y 영역 스케일
+            const xs = data.map(d => d.x);
+            const ys = data.map(d => d.y);
+            const minX = Math.min(...xs), maxX = Math.max(...xs);
+            const rangeX = maxX - minX || 1;
+            const minY = Math.floor(Math.min(...ys) * 0.98);
+            const maxY = Math.ceil(Math.max(...ys) * 1.02);
+            const rangeY = maxY - minY || 1;
+            const xToPx = x => pad.l + ((x - minX) / rangeX) * W;
+            const yToPx = y => pad.t + (1 - ((y - minY) / rangeY)) * H;
+
+            // 그리드
+            ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let i = 0; i <= 5; i++) {
+                const y = pad.t + (i / 5) * H;
+                ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + W, y);
+            }
+            ctx.stroke();
+
+            // 라인
+            ctx.beginPath();
+            data.forEach((p, idx) => {
+                const x = xToPx(p.x), y = yToPx(p.y);
+                if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+            ctx.lineWidth = 2.2; ctx.strokeStyle = '#2563eb'; ctx.stroke();
+
+            // 포인트
+            ctx.fillStyle = '#2563eb';
+            data.forEach(p => {
+                const x = xToPx(p.x), y = yToPx(p.y);
+                ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+            });
+
+            // 축 라벨
+            ctx.fillStyle = '#6b7280'; ctx.font = '12px system-ui';
+            // Y 라벨 5개
+            for (let i = 0; i <= 5; i++) {
+                const v = minY + (i / 5) * rangeY;
+                const y = pad.t + (1 - i / 5) * H + 4;
+                ctx.fillText(v.toFixed(metric === 'weight' ? 2 : 1), 6, y);
+            }
+            // X 라벨: 시작/끝/중간
+            const labelDates = [minX, minX + rangeX / 2, maxX];
+            labelDates.forEach((x, i) => {
+                const d = new Date(x); const s = `${(d.getMonth() + 1)}/${d.getDate()}`;
+                const tx = xToPx(x) - 10; const ty = pad.t + H + 18;
+                ctx.fillText(s, tx, ty);
+            });
+
+            // 툴팁 인터랙션
+            const pts = data.map(p => ({ x: xToPx(p.x), y: yToPx(p.y), raw: p }));
+            canvas.onmousemove = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mx = (e.clientX - rect.left);
+                let nearest = null, best = 99999;
+                pts.forEach(pt => {
+                    const d = Math.abs(pt.x - mx);
+                    if (d < best) { best = d; nearest = pt; }
+                });
+                if (nearest && best < 30) {
+                    tooltip.style.opacity = 1;
+                    tooltip.style.left = nearest.x + 'px';
+                    tooltip.style.top = nearest.y + 'px';
+                    tooltip.textContent = `${nearest.raw.date} • ${nearest.raw.y}${metric === 'weight' ? 'kg' : 'cm'}`;
+                } else { tooltip.style.opacity = 0; }
+            };
+            canvas.onmouseleave = () => tooltip.style.opacity = 0;
+        }
+
+        // 미리보기 썸네일 생성 & 저장
+        function drawPreviewAndSave(rows, metric) {
+            const data = getDataForMetric(rows, metric);
+            const c = previewCanvas, ctx = c.getContext('2d');
+            const W = c.width, H = c.height;
+            ctx.clearRect(0, 0, W, H);
+            // 배경 그래디언트
+            const g = ctx.createLinearGradient(0, 0, 0, H);
+            g.addColorStop(0, '#f8fafc'); g.addColorStop(1, '#eef2ff');
+            ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+            if (data.length) {
+                const xs = data.map(d => d.x), ys = data.map(d => d.y);
+                const minX = Math.min(...xs), maxX = Math.max(...xs), rangeX = maxX - minX || 1;
+                const minY = Math.min(...ys), maxY = Math.max(...ys), rangeY = (maxY - minY) || 1;
+                const x = v => ((v - minX) / rangeX) * (W - 20) + 10;
+                const y = v => (1 - ((v - minY) / rangeY)) * (H - 20) + 10;
+
+                // 면적
+                ctx.beginPath();
+                data.forEach((p, i) => { const xp = x(p.x), yp = y(p.y); if (i === 0) ctx.moveTo(xp, yp); else ctx.lineTo(xp, yp); });
+                ctx.lineTo(x(maxX), H - 10); ctx.lineTo(x(minX), H - 10); ctx.closePath();
+                ctx.fillStyle = 'rgba(37,99,235,0.14)'; ctx.fill();
+
+                // 선
+                ctx.beginPath();
+                data.forEach((p, i) => { const xp = x(p.x), yp = y(p.y); if (i === 0) ctx.moveTo(xp, yp); else ctx.lineTo(xp, yp); });
+                ctx.lineWidth = 2; ctx.strokeStyle = '#2563eb'; ctx.stroke();
+            }
+
+            // 저장 & 미리보기 표시
+            const url = c.toDataURL('image/png');
+            localStorage.setItem(PREVIEW_KEY, url);
+            localStorage.setItem(PREVIEW_META_KEY, JSON.stringify({ metric, updated: new Date().toISOString() }));
+            previewImg.src = url;
+        }
+
+        /***********************
+         * 이벤트
+         ************************/
+        document.getElementById('tab-weight').onclick = (e) => { setMetric('weight', e.target); };
+        document.getElementById('tab-height').onclick = (e) => { setMetric('height', e.target); };
+        document.getElementById('tab-head').onclick = (e) => { setMetric('head', e.target); };
+        function setMetric(m, btn) {
+            metric = m;
+            document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('active', b === btn));
+            drawAll();
+        }
+
+        addBtn.onclick = () => {
+            const d = dateInput.value || todayStr();
+            const w = num(wInput.value), h = num(hInput.value), hd = num(hdInput.value);
+            if (w == null && h == null && hd == null) { alert('적어도 하나의 값을 입력하세요.'); return; }
+            // 같은 날짜는 덮어쓰기
+            const i = rows.findIndex(r => r.date === d);
+            const rec = { date: d, weight: w, height: h, head: hd };
+            if (i >= 0) rows[i] = { ...rows[i], ...rec }; else rows.push(rec);
+            save(rows); renderTable(); drawAll();
+            // 입력값 초기화
+            wInput.value = ''; hInput.value = ''; hdInput.value = '';
+        };
+
+        exportBtn.onclick = () => {
+            const blob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = 'growth_records.json'; a.click(); URL.revokeObjectURL(a.href);
+        };
+        importFile.onchange = (e) => {
+            const f = e.target.files[0]; if (!f) return;
+            const r = new FileReader();
+            r.onload = () => {
+                try {
+                    const arr = JSON.parse(r.result);
+                    if (Array.isArray(arr)) { rows = arr; save(rows); renderTable(); drawAll(); }
+                    else alert('형식이 올바르지 않습니다.');
+                } catch (err) { alert('JSON 파싱 오류'); }
+            };
+            r.readAsText(f);
+            importFile.value = '';
+        };
+        clearBtn.onclick = () => {
+            if (!confirm('모든 기록을 삭제할까요?')) return;
+            rows = []; save(rows); renderTable(); drawAll();
+        };
+
+        /***********************
+         * 초기 렌더
+         ************************/
+        renderTable();
+        // 기존 썸네일 있으면 표시
+        const prev = localStorage.getItem(PREVIEW_KEY);
+        if (prev) previewImg.src = prev;
+        drawAll(); // 차트 + 썸네일 생성
+        document.getElementById('lastSaved').textContent =
+            '마지막 저장: ' + new Date().toLocaleString();
+    </script>
+    <script>
+        (function () {
+            // 파일명만 추출 (루트로 열릴 때는 index.html로 처리)
+            const file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+
+            // 현재 페이지 판별
+            let current = 'home';
+            if (file.includes('tts')) current = 'tts';
+            else if (file.includes('growth')) current = 'growth';
+            // 필요시 추가: else if (file.includes('community')) current = 'community';
+
+            // data-page와 일치하는 항목만 active
+            document.querySelectorAll('.nav a[data-page]').forEach(a => {
+                a.classList.toggle('active', a.dataset.page === current);
+            });
+            // 로고(브랜드)에 active를 주고 싶으면 아래 주석 해제
+            // document.querySelectorAll('.brand[data-page]').forEach(a => {
+            //   a.classList.toggle('active', a.dataset.page === current);
+            // });
+        })();
+    </script>
+
+</body>
+
+</html>

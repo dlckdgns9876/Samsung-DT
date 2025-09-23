@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <title>AI Voice TTS Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            --brand: #2563eb;
+            --line: #e5e7eb;
+            --text: #111827;
+            --muted: #6b7280;
+            --bg: #fff;
+            --card: #fff;
+            --radius: 14px;
+            --shadow: 0 8px 24px rgba(0, 0, 0, .06);
+            --max: 1300px;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        /* 링크 리셋 + 네비 색상/활성화 */
+        a,
+        a:visited {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .nav {
+            display: flex;
+            gap: 16px;
+            color: #4b5563;
+        }
+
+        .nav a.active {
+            color: var(--brand);
+            font-weight: 600;
+        }
+
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif
+        }
+
+        /* ===== 공통 헤더 ===== */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, .85);
+            backdrop-filter: saturate(180%) blur(10px);
+            border-bottom: 1px solid var(--line)
+        }
+
+        .header-inner {
+            height: 56px;
+            display: flex;
+            gap: 20px;
+            align-items: center
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 18px
+        }
+
+        .nav {
+            display: flex;
+            gap: 16px;
+            color: #4b5563
+        }
+
+        .nav a.active {
+            color: var(--brand);
+            font-weight: 600
+        }
+
+        .auth {
+            margin-left: auto;
+            display: flex;
+            gap: 12px;
+            color: #374151
+        }
+
+        .container {
+            max-width: var(--max);
+            margin: 28px auto;
+            padding: 0 16px
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 18px
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px
+        }
+
+        /* desktop: 녹음 스크립트(왼쪽) | TTS(가운데) | 동화 선택(오른쪽) */
+        @media (min-width:1180px) {
+            .grid {
+                grid-template-columns: 340px 1fr 360px
+            }
+        }
+
+        @media (min-width:930px) and (max-width:1179px) {
+            .grid {
+                grid-template-columns: 320px 1fr
+            }
+
+            .col-right {
+                grid-column: 1 / -1
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 16px
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 6px;
+            color: #374151;
+            font-weight: 600
+        }
+
+        select,
+        input,
+        textarea {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 10px;
+            background: #fff
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--line);
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: #f9fafb;
+            cursor: pointer
+        }
+
+        .btn.primary {
+            background: var(--brand);
+            border-color: transparent;
+            color: #fff
+        }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        .player {
+            width: 100%
+        }
+
+        .json {
+            white-space: pre-wrap;
+            background: #f8fafc;
+            border: 1px solid var(--line);
+            padding: 12px;
+            border-radius: 10px;
+            color: #374151
+        }
+
+        .seg {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap
+        }
+
+        .seg button {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: #fff;
+            cursor: pointer
+        }
+
+        .seg button.active {
+            background: #eef2ff;
+            border-color: #c7d2fe;
+            color: #1d4ed8
+        }
+
+        .box {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 12px;
+            background: #fff;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            max-height: 420px;
+            overflow: auto
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 10px
+        }
+
+        .list {
+            display: grid;
+            gap: 8px;
+            margin-top: 8px
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 6px 10px;
+            background: #fff;
+            cursor: pointer
+        }
+
+        .pill.active {
+            background: #eef2ff;
+            border-color: #c7d2fe;
+            color: #1d4ed8
+        }
+
+        .story-head {
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+            align-items: center
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== 공통 네비게이션 헤더 ===== -->
+    <header class="header">
+        <div class="container header-inner">
+            <a class="brand" href="/">초보 육아 웹</a>
+            <nav class="nav">
+                <a href="/" data-page="home" data-nav="primary">홈</a>
+                <a href="/tts" data-page="tts" data-nav="primary">동화</a>
+
+                <!-- 홈 내부 섹션은 앵커만 유지 -->
+                <a href="/#behaviors">행동사전</a>
+                <a href="/#routines">루틴</a>
+
+                <a href="/growth" data-page="growth" data-nav="primary">성장/건강</a>
+                <a href="/#community">커뮤니티</a>
+            </nav>
+        </div>
+    </header>
+
+
+    <!-- ===== 본문 ===== -->
+    <main class="container">
+        <div class="row" style="justify-content:space-between;gap:8px;margin-bottom:8px">
+            <h1>AI Voice TTS Demo <span class="muted" style="font-weight:400">/ KSS · XTTS</span></h1>
+        </div>
+
+        <div class="grid">
+            <!-- LEFT: 녹음 스크립트 패널 -->
+            <aside class="card col-left">
+                <h3 style="margin:0 0 6px">🎙️ 녹음 스크립트</h3>
+                <div class="muted" style="margin-bottom:10px">동화 톤으로 30/60/90초 버전을 선택해 그대로 읽어 주세요.</div>
+                <div class="seg">
+                    <button data-k="s30" class="active">30초</button>
+                    <button data-k="s60">60초</button>
+                    <button data-k="s90">90초</button>
+                </div>
+                <div id="scriptBox" class="box"></div>
+                <div class="actions"><button id="btnScriptCopy" class="btn">복사</button></div>
+                <details style="margin-top:12px">
+                    <summary class="muted">녹음 팁</summary>
+                    <ul class="muted" style="margin:8px 0 0 18px">
+                        <li>조용한 방, 입–마이크 15~20cm, 살짝 측면으로 말하기(파열음 방지)</li>
+                        <li>속도는 느긋하게, 쉼표·마침표마다 잠깐 멈추기</li>
+                        <li>한 가지 톤으로 일관되게 / 한국어만 포함</li>
+                    </ul>
+                </details>
+            </aside>
+
+            <!-- CENTER: 합성/업로드 -->
+            <main class="card col-center">
+                <div class="row" style="gap:12px;flex-wrap:wrap">
+                    <div style="flex:1 1 220px">
+                        <label for="engine">엔진</label>
+                        <select id="engine">
+                            <option value="xtts" selected>xtts (다국어, 보이스 프로필 필요)</option>
+                            <option value="kss" disabled>kss (단일 화자, 프로필 불필요) – 비활성</option>
+                        </select>
+                    </div>
+                    <div style="flex:1 1 220px">
+                        <label for="language">언어</label>
+                        <select id="language">
+                            <option value="ko" selected>ko (Korean)</option>
+                            <option value="en">en (English)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label for="userId">userid (XTTS 전용)</label>
+                <input id="userId" placeholder="예: user1" />
+                <p class="muted" style="margin:8px 0 0">XTTS는 먼저 아래에서 보이스 프로필(.wav)을 업로드해야 합니다.</p>
+
+                <label for="text" style="margin-top:12px">텍스트</label>
+                <textarea id="text" placeholder="예) 오늘은 어떤 모험을 떠나 볼까요?"></textarea>
+
+                <div class="row" style="margin-top:12px">
+                    <button id="btnSynth" class="btn primary" style="flex:1">합성하기</button>
+                    <button id="btnClear" class="btn">초기화</button>
+                </div>
+
+                <audio id="player" class="player" controls style="margin-top:12px"></audio>
+                <div id="resp" class="json" style="margin-top:12px;display:none"></div>
+
+                <hr style="margin:18px 0;border:none;border-top:1px solid var(--line)" />
+
+                <h3 style="margin:0 0 8px">보이스 프로필 업로드 (XTTS용)</h3>
+                <div class="row" style="gap:12px;flex-wrap:wrap">
+                    <div style="flex:1 1 220px">
+                        <label for="upUser">userid</label>
+                        <input id="upUser" placeholder="예: user1" />
+                    </div>
+                    <div style="flex:1 1 220px">
+                        <label for="upFile">speaker wav</label>
+                        <input id="upFile" type="file" accept=".wav,.mp3,.m4a,.aac,.flac,.ogg" />
+                    </div>
+                </div>
+                <button id="btnUpload" class="btn primary" style="margin-top:10px">프로필 업로드</button>
+                <div id="upMsg" class="muted" style="margin-top:8px"></div>
+            </main>
+
+            <!-- RIGHT: 테마별 동화 선택 -->
+            <aside class="card col-right">
+                <div class="story-head">
+                    <h3 style="margin:0">📚 테마별 동화</h3>
+                    <span class="muted" style="font-size:12px">원본 창작 · 자유 이용</span>
+                </div>
+
+                <div class="seg" id="themeChips" style="margin-top:8px"></div>
+                <div id="storyList" class="list"></div>
+
+                <div style="margin-top:12px">
+                    <div class="row" style="justify-content:space-between;align-items:center">
+                        <strong id="storyTitle">선택한 동화</strong>
+                        <div class="row" style="gap:6px">
+                            <button id="btnStoryInsert" class="btn">텍스트 상자에 넣기</button>
+                        </div>
+                    </div>
+                    <div id="storyBox" class="box" style="margin-top:8px;min-height:140px"></div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        // ===== 녹음 스크립트 =====
+        const SCRIPTS = {
+            s30: `오늘 밤, 작은 별 하나가 창가에 비칩니다.
+나는 조용히 속삭여요. “잘 자, 아가.”
+구름은 살랑살랑, 바람은 살짝 지나가요.
+토끼는 “깡총!”, 고양이는 “냐옹.” 인사하고,
+아가는 포근한 이불 속에서 눈을 감습니다.
+“내일도 함께 놀자.” 오늘 밤도 평안히, 꿈나라로 가요.`,
+            s60: `해가 지고 집이 조용해지면, 작은 등불이 방을 밝힙니다.
+나는 부드럽게 말해요. “오늘 하루도 정말 잘했어.”
+창밖에는 바람이 나뭇잎을 살살 건드리고, 시계는 “똑딱, 똑딱” 시간을 세죠.
+곰돌이는 베개를 꼭 끌어안고, 토끼는 귀를 말아 눕습니다.
+“무엇을 꿈꿀까?” 반짝반짝 별들이 속삭여요.
+아가는 크게 한번 하품을 하고, 작게 웃으며 눈을 감습니다.
+“사랑해.” 오늘의 따뜻함을 이불 속에 담고, 천천히 꿈나라로 떠나요.`,
+            s90: `해가 서쪽 하늘 아래로 살며시 숨어들면,
+우리 방에는 포근한 밤공기가 내려와요.
+나는 조용히 물어봅니다. “오늘은 어떤 이야기를 들려줄까?”
+창문 너머, 부드러운 바람이 커튼을 살짝 밀고,
+별빛은 “반짝” 눈을 깜박이며 인사하죠.
+곰돌이, 토끼, 기린, 고양이 친구들은 차례차례 속삭여요.
+“잘 자라, 아가!” “내일 또 만나!” “꿈에서 함께 놀자!”
+시계는 “똑딱, 똑딱”, 마음은 “콩닥, 콩닥”,
+발자국 소리는 사라지고, 이불 속 온기는 점점 더 따뜻해져요.
+나는 부드럽게 말해요. “깊게 숨 쉬고, 편안히 눈을 감아 볼까?”
+오늘의 웃음, 고마움, 작은 모험을 천천히 떠올리며,
+“사랑해.” 한마디를 살며시 건네요.
+이제 아가는 고운 꿈의 숲으로, 별들의 길을 따라 천천히 걸어갑니다.
+밤새 포근하게 쉬고, 내일 아침 환하게 웃어 보자. 잘 자요.`
+        };
+        const scriptBox = document.getElementById('scriptBox');
+        const segBtns = [...document.querySelectorAll('.seg button')].filter(b => b.dataset.k);
+        const btnScriptCopy = document.getElementById('btnScriptCopy');
+        const textArea = document.getElementById('text');
+        function setScript(key) { segBtns.forEach(b => b.classList.toggle('active', b.dataset.k === key)); scriptBox.textContent = SCRIPTS[key]; }
+        segBtns.forEach(b => b.addEventListener('click', () => setScript(b.dataset.k))); setScript('s30');
+        btnScriptCopy.onclick = async () => { await navigator.clipboard.writeText(scriptBox.textContent); btnScriptCopy.textContent = '복사됨!'; setTimeout(() => btnScriptCopy.textContent = '복사', 1200); };
+
+        // ===== 테마별 동화 =====
+        const STORIES = [{
+            id: 'star_blanket', title: '별 이불', theme: '잠자리', text: `밤하늘이 조용해질 때, 작은 별들이 아가에게 살짝 다가왔어요.
+“추울까?” 반짝반짝, 별들이 빛으로 이불을 짝— 펼쳤지요.
+달님이 둥글게 웃으며 말해요. “포근포근, 꿈나라 준비!”
+바람은 살살, 커튼은 살짝, 방안은 따뜻해졌어요.
+아가는 이불을 껴안고 속삭여요. “고마워, 별 친구들.”
+반짝, 반짝. 오늘의 기쁨을 하나씩 접어 넣고,
+달님이 토닥토닥— “잘 자라, 내일 또 반짝!”
+아가는 하품 한번, 눈을 꼭 감아요.
+포근포근, 반짝반짝, 꿈이 살금살금 찾아옵니다.`},
+        {
+            id: 'momo_train', title: '칙칙폭폭 모모 기차', theme: '우정', text: `장난감 기차 모모가 “칙칙— 폭폭!” 소리를 내며 출발했어요.
+곰돌이 역, 토끼 역, 오리 연못 역에 차례차례 서요.
+“탑승하세요!” 모모가 말하자, 친구들이 “깡총! 꽥꽥!” 올라탑니다.
+“손잡고, 마음도 꽉!” 기차가 둥근 방을 한 바퀴 도는 동안,
+창밖 구름은 몽글몽글, 바람은 솔솔—
+친구들은 서로 인사해요. “안녕!” “함께 가요!”
+마지막 역은 이불 산역. “도착했습니다!”
+모모는 살짝 브레이크. “끼이익— 푹!”
+친구들은 포근한 이불에 착석!
+모모가 속삭여요. “꿈나라 급행, 출발!” 칙칙— 폭폭—.`},
+        {
+            id: 'yawn_seed', title: '씨앗의 하품', theme: '성장', text: `작은 씨앗 하나가 “하아—” 하품을 했어요.
+빗방울이 “또록또록” 인사를 하고, 흙이 “포옥” 감싸 줍니다.
+해님이 “반짝!” 손을 흔들자, 씨앗은 “쑥— 쑥—” 기지개를 켜요.
+초록 잎이 “살랑”, 작은 꽃봉오리가 “톡!”
+“안녕, 세상!” 씨앗은 용기 내어 인사했지요.
+지나가던 나비가 말해요. “천천히, 네 속도로.”
+바람도 말해요. “토닥토닥, 네가 좋아.”
+씨앗은 미소 지으며 조금 더 자라요.
+오늘은 잎 한 장, 내일은 꽃 한 송이.
+쑥쑥, 토닥토닥— 작은 성장도 충분히 멋져요.`},
+        {
+            id: 'umbrella_concert', title: '우산 음악회', theme: '비', text: `비가 “톡톡— 톡톡—” 창문을 두드리자, 우산들이 모였어요.
+빨간 우산은 “딩~”, 파란 우산은 “동~”, 노란 우산은 “딩동!”
+현관 앞 작은 연못이 무대가 되었지요.
+장화가 “척척”, 물방울이 “뽀글뽀글”,
+비눗방울이 살짝 떠오르며 반짝반짝 조명을 켜요.
+우산 지휘자가 말해요. “크게— 작게— 천천히—”
+비는 점점 잦아들고, 노래는 조용해집니다.
+마지막 한 음, “딩—”.
+모두가 속삭여요. “참 좋았다.”
+비가 그치면, 무대는 맑은 하늘로 바뀌지요.`},
+        {
+            id: 'sea_star_pouch', title: '바닷별 주머니', theme: '바다', text: `파도는 “찰랑— 찰랑—” 노래하며 해변을 쓸어 줘요.
+달빛 주머니 속에는 조개별, 모래별, 작은 바닷별이 반짝!
+아기가 하나씩 꺼내며 인사해요. “안녕, 반짝 친구들!”
+조개별은 “사각사각”, 모래별은 “보들보들”.
+바닷별은 말해요. “우린 다 해님과 바다의 선물이야.”
+파도가 속삭여요. “필요할 때만 꺼내 보고, 다시 우리에게 돌려줘.”
+아기는 끄덕, 주머니를 꼭 쥐고는,
+별들을 한 번 더 바라봅니다. 반짝—
+“고마워. 내 마음도 반짝!”
+밤이 깊어지자, 바닷별이 길을 밝혀 집으로 안내해요.`}];
+        const THEMES = ['전체', '잠자리', '우정', '성장', '비', '바다'];
+        const themeChips = document.getElementById('themeChips');
+        const storyList = document.getElementById('storyList');
+        const storyTitle = document.getElementById('storyTitle');
+        const storyBox = document.getElementById('storyBox');
+        const btnStoryInsert = document.getElementById('btnStoryInsert');
+        let currentTheme = '전체', currentStory = null;
+
+        function renderThemeChips() {
+            themeChips.innerHTML = '';
+            THEMES.forEach(t => {
+                const b = document.createElement('button');
+                b.className = 'pill' + (t === currentTheme ? ' active' : '');
+                b.textContent = t;
+                b.onclick = () => { currentTheme = t; renderThemeChips(); renderStoryList(); };
+                themeChips.appendChild(b);
+            });
+        }
+        function renderStoryList() {
+            storyList.innerHTML = '';
+            const list = STORIES.filter(s => currentTheme === '전체' || s.theme === currentTheme);
+            list.forEach(s => {
+                const row = document.createElement('div');
+                row.className = 'row';
+                row.style.justifyContent = 'space-between';
+                row.style.alignItems = 'center';
+                row.style.border = '1px solid var(--line)';
+                row.style.borderRadius = '10px';
+                row.style.padding = '10px 12px';
+                const left = document.createElement('div');
+                left.innerHTML = `<strong>${s.title}</strong> <span class="muted">· ${s.theme}</span>`;
+                const right = document.createElement('div');
+                const btn = document.createElement('button');
+                btn.className = 'btn'; btn.textContent = '보기'; btn.onclick = () => showStory(s.id);
+                right.appendChild(btn); row.appendChild(left); row.appendChild(right);
+                storyList.appendChild(row);
+            });
+            if (list.length && (!currentStory || !list.find(x => x.id === currentStory.id))) { showStory(list[0].id); }
+        }
+        function showStory(id) {
+            const s = STORIES.find(x => x.id === id); if (!s) return;
+            currentStory = s; storyTitle.textContent = s.title; storyBox.textContent = s.text;
+        }
+        btnStoryInsert.onclick = () => { if (!currentStory) return; textArea.value = currentStory.text; textArea.focus(); };
+        renderThemeChips(); renderStoryList();
+
+        // ===== 합성 =====
+        const engineSel = document.getElementById('engine');
+        const langSel = document.getElementById('language');
+        const userIdInput = document.getElementById('userId');
+        const btnSynth = document.getElementById('btnSynth');
+        const btnClear = document.getElementById('btnClear');
+        const player = document.getElementById('player');
+        const resp = document.getElementById('resp');
+
+        btnSynth.onclick = async () => {
+            const payload = { engine: engineSel.value, language: langSel.value, userId: userIdInput.value.trim(), text: textArea.value.trim() };
+            try {
+                const r = await fetch('/tts/synthesize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const j = await r.json();
+                resp.style.display = 'block'; resp.textContent = JSON.stringify(j, null, 2);
+                if (j.audioUrl) { player.src = j.audioUrl; await player.play().catch(() => { }); }
+            } catch (e) { resp.style.display = 'block'; resp.textContent = '합성 오류: ' + e.message; }
+        };
+        btnClear.onclick = () => { textArea.value = ''; player.removeAttribute('src'); resp.style.display = 'none'; resp.textContent = ''; };
+
+        // ===== 업로드 =====
+        const upUser = document.getElementById('upUser');
+        const upFile = document.getElementById('upFile');
+        const btnUpload = document.getElementById('btnUpload');
+        const upMsg = document.getElementById('upMsg');
+        btnUpload.onclick = async () => {
+            const uid = (upUser.value || '').trim(); const file = upFile.files[0];
+            if (!uid || !file) { upMsg.textContent = 'userid와 파일을 선택하세요.'; return; }
+            const fd = new FormData(); fd.append('userId', uid); fd.append('file', file);
+            btnUpload.disabled = true; upMsg.textContent = '업로드 중...';
+            try {
+                const r = await fetch('/voice-profiles/upload', { method: 'POST', body: fd });
+                const j = await r.json();
+                upMsg.textContent = j.ok ? '업로드 완료!' : '업로드 실패';
+                if (j.ok) { userIdInput.value = uid; }
+            } catch (e) { upMsg.textContent = '업로드 오류: ' + e.message; }
+            finally { btnUpload.disabled = false; }
+        };
+    </script>
+    <script>
+        (function () {
+            // 파일명만 추출 (루트로 열릴 때는 index.html로 처리)
+            const file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+
+            // 현재 페이지 판별
+            let current = 'home';
+            if (file.includes('tts')) current = 'tts';
+            else if (file.includes('growth')) current = 'growth';
+            // 필요시 추가: else if (file.includes('community')) current = 'community';
+
+            // data-page와 일치하는 항목만 active
+            document.querySelectorAll('.nav a[data-page]').forEach(a => {
+                a.classList.toggle('active', a.dataset.page === current);
+            });
+            // 로고(브랜드)에 active를 주고 싶으면 아래 주석 해제
+            // document.querySelectorAll('.brand[data-page]').forEach(a => {
+            //   a.classList.toggle('active', a.dataset.page === current);
+            // });
+        })();
+    </script>
+
+</body>
+
+</html>
