@@ -91,6 +91,8 @@ exports.login = async (req, res) => {
 
 exports.kakaoCallback = async (req, res) => {
   const { code } = req.query; // 카카오로부터 받은 인증 코드
+  // 클라이언트가 접속한 주소를 기반으로 Redirect URI를 동적으로 생성
+  const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/kakao/callback`;
 
   try {
     // 1. 인증 코드로 액세스 토큰 받기 (axios 사용)
@@ -98,7 +100,7 @@ exports.kakaoCallback = async (req, res) => {
       params: {
         grant_type: 'authorization_code',
         client_id: process.env.KAKAO_REST_API_KEY,
-        redirect_uri: process.env.KAKAO_REDIRECT_URI,
+        redirect_uri: redirectUri, // 동적으로 생성된 URI 사용
         code,
       },
       headers: {

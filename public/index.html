@@ -64,9 +64,19 @@
                                 <button type="submit" class="btn btn-success w-100">로그인</button>
                             </form>
                             <div class="mt-3 text-center">
-                                <a href="https://kauth.kakao.com/oauth/authorize?client_id=7d34118f4498bbd5f47ea0804d89ef21&redirect_uri=http://localhost:4000/api/auth/kakao/callback&response_type=code">
-                                    <img src="/kakao_login.png" alt="카카오 로그인 버튼" />
-                                </a>
+                                <div class="d-flex justify-content-center align-items-center flex-wrap mb-2">
+                                    <!-- 네이버 로그인 (이미지만) -->
+                                    <a href="#" class="m-1"><img src="/naver_login.png" alt="네이버 로그인 버튼" style="height: 45px; width: auto;"/></a>
+                                    <!-- 카카오 로그인 (동적 URL) -->
+                                    <a id="kakaoLoginBtn" href="#" class="m-1">
+                                        <img src="/kakao_login.png" alt="카카오 로그인 버튼" style="height: 45px; width: auto;"/>
+                                    </a>
+                                </div>
+                                <div class="d-flex justify-content-center align-items-center flex-wrap">
+                                    <!-- 구글, 애플 로그인 (이미지만) -->
+                                    <a href="#" class="m-1"><img src="/google_login.png" alt="구글 로그인 버튼" style="height: 45px; width: auto;"/></a>
+                                    <a href="#" class="m-1"><img src="/apple_login.png" alt="애플 로그인 버튼" style="height: 45px; width: auto;"/></a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -74,10 +84,10 @@
 
                 <!-- 로그인 시 보이는 영역 -->
                 <div id="user-section" style="display: none;">
-                    <!-- 아기 정보 추가 -->
+                    <!-- 아기 프로필 추가 -->
                     <div class="card mb-4 shadow-sm">
                         <div class="card-body">
-                            <h2 class="card-title fs-4 mb-3">아기 정보 추가</h2>
+                            <h2 class="card-title fs-4 mb-3">아기 프로필 추가</h2>
                             <form id="addBabyForm">
                                 <div class="mb-3">
                                     <label for="babyName" class="form-label">아기 이름</label>
@@ -85,14 +95,27 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="babyBirthDate" class="form-label">생년월일</label>
-                                    <input type="date" class="form-control" id="babyBirthDate" required>
+                                    <input type="date" class="form-control" id="babyBirthDate" required> <!-- id를 babyBirthdate로 변경 -->
                                 </div>
                                 <div class="mb-3">
                                     <label for="babyGender" class="form-label">성별</label>
                                     <select class="form-select" id="babyGender">
-                                        <option value="Male">남자</option>
-                                        <option value="Female">여자</option>
+                                        <option value="미정">미정</option>
+                                        <option value="남아">남아</option>
+                                        <option value="여아">여아</option>
                                     </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="babyBloodType" class="form-label">혈액형</label>
+                                    <input type="text" class="form-control" id="babyBloodType" placeholder="예: A+">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="babyNotes" class="form-label">특이사항</label>
+                                    <textarea class="form-control" id="babyNotes" rows="3"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="babyProfileImage" class="form-label">프로필 사진</label>
+                                    <input type="file" class="form-control" id="babyProfileImage" accept="image/*">
                                 </div>
                                 <button type="submit" class="btn btn-info w-100 text-white">추가</button>
                             </form>
@@ -103,7 +126,20 @@
                         <div class="card-body">
                             <h2 class="card-title fs-4 mb-3">내 아기 정보</h2>
                             <button id="getMyBabiesBtn" class="btn btn-secondary w-100 mb-3">가져오기</button>
-                            <pre id="result" class="bg-light p-3 rounded">API 호출 결과가 여기에 표시됩니다.</pre>
+                            <div id="result" class="bg-light p-3 rounded">
+                                <!-- API 호출 결과가 테이블 형태로 여기에 표시됩니다. -->
+                                <table class="table table-hover" style="display: none;">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">프로필</th>
+                                            <th scope="col">이름</th>
+                                            <th scope="col">생년월일</th>
+                                            <th scope="col">성별</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="babies-table-body"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -148,9 +184,56 @@
             }
         };
 
+        // 카카오 로그인 URL을 동적으로 설정하는 함수
+        const setKakaoLoginUrl = () => {
+            const kakaoLoginBtn = document.getElementById('kakaoLoginBtn');
+            if (kakaoLoginBtn) {
+                // 중요: .env 파일에 KAKAO_REST_API_KEY를 설정해야 합니다.
+                // 여기서는 클라이언트 사이드에서 키를 노출하지 않기 위해 서버에서 가져오는 것이 이상적이지만,
+                // 현재 구조에서는 임시로 하드코딩하거나, 서버 API를 통해 키를 받아오는 로직이 필요합니다.
+                // 지금은 기존 코드에 있던 키를 그대로 사용합니다.
+                const KAKAO_REST_API_KEY = '7d34118f4498bbd5f47ea0804d89ef21';
+                const redirectUri = `${window.location.origin}/api/auth/kakao/callback`;
+                kakaoLoginBtn.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${redirectUri}&response_type=code`;
+            }
+        };
+
         // API 호출 결과를 화면에 표시하는 함수
         const displayResult = (data) => {
-            resultEl.textContent = JSON.stringify(data, null, 2);
+            const table = resultEl.querySelector('table');
+            const tableBody = document.getElementById('babies-table-body');
+
+            // 기존 내용 초기화
+            tableBody.innerHTML = '';
+
+            if (Array.isArray(data) && data.length > 0) {
+                table.style.display = 'table'; // 데이터가 있으면 테이블 보이기
+                data.forEach(baby => {
+                    const row = document.createElement('tr');
+
+                    // 날짜 포맷 변경 (YYYY-MM-DD)
+                    const birthdate = new Date(baby.birthdate).toISOString().split('T')[0];
+
+                    // 프로필 이미지 처리
+                    const profileImage = baby.profile_image_url 
+                        ? `<img src="${baby.profile_image_url}" alt="${baby.name} 프로필 사진" class="rounded-circle" width="50" height="50" style="object-fit: cover;">`
+                        : `<div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
+                               <span class="text-white small">사진없음</span>
+                           </div>`;
+
+                    row.innerHTML = `
+                        <td>${profileImage}</td>
+                        <td class="align-middle">${baby.name}</td>
+                        <td class="align-middle">${birthdate}</td>
+                        <td class="align-middle">${baby.gender}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                table.style.display = 'none'; // 데이터가 없으면 테이블 숨기기
+                // 데이터가 없거나 실패했을 때의 메시지 처리
+                resultEl.innerHTML = `<div class="text-center text-muted">표시할 아기 정보가 없습니다.</div>`;
+            }
         };
 
         // 회원가입 폼 제출
@@ -215,24 +298,36 @@
                 return;
             }
 
-            const name = document.getElementById('babyName').value;
-            const birth_date = document.getElementById('babyBirthDate').value;
-            const gender = document.getElementById('babyGender').value;
+            // FormData 객체를 사용하여 파일과 텍스트 데이터를 함께 전송
+            const formData = new FormData();
+            formData.append('name', document.getElementById('babyName').value);
+            formData.append('birthdate', document.getElementById('babyBirthDate').value);
+            formData.append('gender', document.getElementById('babyGender').value);
+            formData.append('blood_type', document.getElementById('babyBloodType').value);
+            formData.append('notes', document.getElementById('babyNotes').value);
+            
+            const imageFile = document.getElementById('babyProfileImage').files[0];
+            if (imageFile) {
+                formData.append('profile_image', imageFile);
+            }
 
             try {
                 const res = await fetch('/api/babies', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        // FormData를 사용할 때는 'Content-Type'을 설정하지 않아야 브라우저가 자동으로 설정해줍니다.
                         'x-auth-token': token,
                     },
-                    body: JSON.stringify({ name, birth_date, gender }),
+                    body: formData,
                 });
                 const data = await res.json();
                 if (!res.ok) throw data;
 
                 displayResult({ message: '아기 정보 추가 성공!', baby: data });
+                addBabyForm.reset(); // 성공 시 폼 초기화
+                alert('아기 정보가 성공적으로 추가되었습니다.');
             } catch (err) {
+                alert(`아기 정보 추가 실패: ${err.msg || '서버 오류'}`);
                 displayResult({ error: '아기 정보 추가 실패', details: err });
             }
         });
@@ -272,6 +367,7 @@
         // 페이지 로드 시 로그인 상태 확인 및 UI 업데이트
         document.addEventListener('DOMContentLoaded', () => {
             updateLoginStatus();
+            setKakaoLoginUrl(); // 카카오 로그인 URL 설정 함수 호출
         });
     </script>
 </body>
