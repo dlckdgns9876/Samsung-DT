@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>육아 앱 테스트</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- 로그인 상태 표시 영역 -->
+    <div id="user-status" class="d-flex justify-content-end align-items-center p-3">
+        <!-- JavaScript를 통해 동적으로 내용이 채워집니다 -->
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="text-center my-5">
+                    <h1 class="mb-4">육아 앱 테스트</h1>
+                </div>
+
+                <!-- 비로그인 시 보이는 영역 -->
+                <div id="guest-section">
+                    <!-- 회원가입 -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <h2 class="card-title fs-4 mb-3">회원가입</h2>
+                            <form id="registerForm">
+                                <div class="mb-3">
+                                    <label for="regId" class="form-label">아이디</label>
+                                    <input type="text" class="form-control" id="regId" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="regPassword" class="form-label">비밀번호</label>
+                                    <input type="password" class="form-control" id="regPassword" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="regEmail" class="form-label">이메일</label>
+                                    <input type="email" class="form-control" id="regEmail" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="regNickname" class="form-label">닉네임</label>
+                                    <input type="text" class="form-control" id="regNickname" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">가입</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- 로그인 -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <h2 class="card-title fs-4 mb-3">로그인</h2>
+                            <form id="loginForm">
+                                <div class="mb-3">
+                                    <label for="loginId" class="form-label">아이디</label>
+                                    <input type="text" class="form-control" id="loginId" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginPassword" class="form-label">비밀번호</label>
+                                    <input type="password" class="form-control" id="loginPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">로그인</button>
+                            </form>
+                            <div class="mt-3 text-center">
+                                <a href="https://kauth.kakao.com/oauth/authorize?client_id=7d34118f4498bbd5f47ea0804d89ef21&redirect_uri=http://localhost:4000/api/auth/kakao/callback&response_type=code">
+                                    <img src="/kakao_login.png" alt="카카오 로그인 버튼" />
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 로그인 시 보이는 영역 -->
+                <div id="user-section" style="display: none;">
+                    <!-- 아기 정보 추가 -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <h2 class="card-title fs-4 mb-3">아기 정보 추가</h2>
+                            <form id="addBabyForm">
+                                <div class="mb-3">
+                                    <label for="babyName" class="form-label">아기 이름</label>
+                                    <input type="text" class="form-control" id="babyName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="babyBirthDate" class="form-label">생년월일</label>
+                                    <input type="date" class="form-control" id="babyBirthDate" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="babyGender" class="form-label">성별</label>
+                                    <select class="form-select" id="babyGender">
+                                        <option value="Male">남자</option>
+                                        <option value="Female">여자</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-info w-100 text-white">추가</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card mb-5 shadow-sm">
+                        <div class="card-body">
+                            <h2 class="card-title fs-4 mb-3">내 아기 정보</h2>
+                            <button id="getMyBabiesBtn" class="btn btn-secondary w-100 mb-3">가져오기</button>
+                            <pre id="result" class="bg-light p-3 rounded">API 호출 결과가 여기에 표시됩니다.</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 간단한 테스트용 스크립트 (실제 프로젝트에서는 분리해야 함) -->
+    <script>
+        const registerForm = document.getElementById('registerForm');
+        const loginForm = document.getElementById('loginForm');
+        const addBabyForm = document.getElementById('addBabyForm');        
+        const getMyBabiesBtn = document.getElementById('getMyBabiesBtn');
+        const resultEl = document.getElementById('result');
+
+        const userStatusEl = document.getElementById('user-status');
+        const guestSection = document.getElementById('guest-section');
+        const userSection = document.getElementById('user-section');
+
+        // 로그인 상태를 UI에 반영하는 함수
+        const updateLoginStatus = () => {
+            const token = localStorage.getItem('token');
+            const nickname = localStorage.getItem('nickname');
+
+            if (token && nickname) {
+                // 로그인 상태 UI
+                userStatusEl.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-primary me-2">${nickname}</span>
+                        <span class="text-secondary">님, 환영합니다!</span>
+                        <a href="/mypage" class="text-decoration-none text-secondary mx-3">마이페이지</a>
+                        <button id="logoutBtn" class="btn btn-outline-secondary btn-sm">로그아웃</button>
+                    </div>
+                `;
+                guestSection.style.display = 'none';
+                userSection.style.display = 'block';
+            } else {
+                // 로그아웃 상태 UI
+                userStatusEl.innerHTML = '';
+                guestSection.style.display = 'block';
+                userSection.style.display = 'none';
+            }
+        };
+
+        // API 호출 결과를 화면에 표시하는 함수
+        const displayResult = (data) => {
+            resultEl.textContent = JSON.stringify(data, null, 2);
+        };
+
+        // 회원가입 폼 제출
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const login_id = document.getElementById('regId').value; // 'regName' -> 'regId'로 변경하고 변수명도 login_id로 변경
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const nickname = document.getElementById('regNickname').value;
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login_id, email, password, nickname }), // name -> login_id로 변경
+                });
+                const data = await res.json();
+                if (!res.ok) throw data;
+
+                alert('회원가입에 성공했습니다! 이제 로그인해주세요.');
+                registerForm.reset(); // 폼 초기화
+            } catch (err) {
+                alert(`회원가입 실패: ${err.msg || '서버 오류'}`);
+                displayResult({ error: '회원가입 실패', details: err });
+            }
+        });
+
+        // 로그인 폼 제출
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const login_id = document.getElementById('loginId').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login_id, password }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw data;
+
+                // 토큰과 닉네임을 localStorage에 저장
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('nickname', data.user.nickname);
+                localStorage.setItem('login_type', 'local'); // 일반 로그인 타입 저장
+
+                alert(`${data.user.nickname}님, 환영합니다!`);
+                updateLoginStatus(); // 로그인 상태 UI 업데이트
+            } catch (err) {
+                alert(`로그인 실패: ${err.msg || '아이디 또는 비밀번호를 확인하세요.'}`);
+                displayResult({ error: '로그인 실패', details: err });
+            }
+        });
+
+        // 아기 정보 추가 폼 제출
+        addBabyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            if (!token) {
+                displayResult({ error: '로그인이 필요합니다.' });
+                return;
+            }
+
+            const name = document.getElementById('babyName').value;
+            const birth_date = document.getElementById('babyBirthDate').value;
+            const gender = document.getElementById('babyGender').value;
+
+            try {
+                const res = await fetch('/api/babies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token,
+                    },
+                    body: JSON.stringify({ name, birth_date, gender }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw data;
+
+                displayResult({ message: '아기 정보 추가 성공!', baby: data });
+            } catch (err) {
+                displayResult({ error: '아기 정보 추가 실패', details: err });
+            }
+        });
+
+        // 내 아기 정보 가져오기 버튼 클릭
+        getMyBabiesBtn.addEventListener('click', async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                displayResult({ error: '로그인이 필요합니다.' });
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/babies', {
+                    headers: { 'x-auth-token': token },
+                });
+                const data = await res.json();
+                if (!res.ok) throw data;
+
+                displayResult(data);
+            } catch (err) {
+                displayResult({ error: '아기 정보 조회 실패', details: err });
+            }
+        });
+
+        // 로그아웃 버튼 이벤트 처리 (이벤트 위임 사용)
+        userStatusEl.addEventListener('click', (e) => {
+            if (e.target.id === 'logoutBtn') {
+                localStorage.removeItem('token');
+                localStorage.removeItem('nickname');
+                localStorage.removeItem('login_type'); // 로그아웃 시 타입도 제거
+                updateLoginStatus(); // 로그아웃 상태 UI 업데이트
+                alert('로그아웃 되었습니다.');
+            }
+        });
+
+        // 페이지 로드 시 로그인 상태 확인 및 UI 업데이트
+        document.addEventListener('DOMContentLoaded', () => {
+            updateLoginStatus();
+        });
+    </script>
+</body>
+</html>
+
+<!--
+[PROMPT_SUGGESTION]public/index.html 파일에 API를 호출하고 결과를 표시하는 JavaScript 코드를 완성해줘[/PROMPT_SUGGESTION]
+[PROMPT_SUGGESTION]아기 정보 수정 및 삭제 기능을 추가해줘[/PROMPT_SUGGESTION]
+-->
