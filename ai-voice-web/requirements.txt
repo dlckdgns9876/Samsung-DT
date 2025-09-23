@@ -1,0 +1,21 @@
+# --- Core scientific stack ---
+numpy
+scipy
+pandas
+matplotlib
+
+# --- Audio ---
+soundfile
+librosa
+torchaudio
+
+# --- ML ---
+torch
+
+# --- Web/API (later) ---
+fastapi
+uvicorn[standard]
+pydantic
+
+# --- TTS (can be heavy; install after torch) ---
+TTS
