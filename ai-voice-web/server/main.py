@@ -18,10 +18,10 @@ from TTS.api import TTS  # Coqui TTS
 
 # ── 경로 ──────────────────────────────────────────────────────────────────────
 BASE = Path(__file__).resolve().parent.parent  # ai-voice-web/
-WEB = BASE / "web"
+WEB_BUILD = BASE / "web-react" / "dist"  # React 빌드 결과물 경로
 DATA = BASE / "generated"
-PROFILES = BASE / "profiles"
-for p in (WEB, DATA, PROFILES):
+PROFILES = BASE / "profiles" 
+for p in (WEB_BUILD, DATA, PROFILES):
     p.mkdir(parents=True, exist_ok=True)
 
 # ── ffmpeg 경로 탐색(여러 후보를 순회) ───────────────────────────────────────
@@ -51,34 +51,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 생성 오디오/프로필 정적 서빙
+# API 외의 정적 파일 서빙 설정
 app.mount("/generated", StaticFiles(directory=str(DATA), html=False), name="generated")
 app.mount("/profiles", StaticFiles(directory=str(PROFILES), html=False), name="profiles")
 
-# ── 페이지 라우트 ────────────────────────────────────────────────────────────
-@app.get("/")
-def page_home():
-    return FileResponse(WEB / "index.html")
-
-@app.get("/index.html")
-def page_home_html():
-    return FileResponse(WEB / "index.html")
-
-@app.get("/tts")
-def page_tts():
-    return FileResponse(WEB / "tts.html")
-
-@app.get("/tts.html")
-def page_tts_html():
-    return FileResponse(WEB / "tts.html")
-
-@app.get("/growth")
-def page_growth():
-    return FileResponse(WEB / "growth.html")
-
-@app.get("/growth.html")
-def page_growth_html():
-    return FileResponse(WEB / "growth.html")
+# React 앱의 assets(js, css 등) 서빙
+app.mount("/assets", StaticFiles(directory=WEB_BUILD / "assets"), name="assets")
 
 # ── 헬스 체크 ────────────────────────────────────────────────────────────────
 @app.get("/health")
@@ -193,6 +171,7 @@ def synthesize(req: SynthesizeRequest):
     chunks = [" ".join(sentences[i:i + CHUNK_SIZE]) for i in range(0, len(sentences), CHUNK_SIZE)]
 
     part_paths: List[Path] = []
+    concat_list_path: Optional[Path] = None
     out = DATA / f"{uuid.uuid4().hex}.wav"
 
     try:
@@ -215,33 +194,42 @@ def synthesize(req: SynthesizeRequest):
             if not FFMPEG:
                 raise HTTPException(500, "ffmpeg is required to merge audio chunks.")
             # ffmpeg concat demuxer 사용 (경로 안전하게 -safe 0)
-            concat_list = DATA / f"{uuid.uuid4().hex}_concat.txt"
-            with open(concat_list, "w", encoding="utf-8") as f:
+            concat_list_path = DATA / f"{uuid.uuid4().hex}_concat.txt"
+            with open(concat_list_path, "w", encoding="utf-8") as f:
                 for p in part_paths:
                     f.write(f"file '{p.as_posix()}'\n")
 
             cmd = [
                 FFMPEG, "-y",
                 "-f", "concat", "-safe", "0",
-                "-i", str(concat_list),
+                "-i", str(concat_list_path),
                 "-ar", "24000", "-ac", "1", "-c:a", "pcm_s16le",
                 str(out),
             ]
             subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-            try:
-                concat_list.unlink(missing_ok=True)
-            except Exception:
-                pass
-
         return {"audioUrl": f"/generated/{out.name}"}
 
     except subprocess.CalledProcessError as e:
-        raise HTTPException(500, f"ffmpeg failed while merging: {e.stderr.decode(errors='ignore')[:400]}")
+        # 전체 stderr를 로깅하고, 클라이언트에게는 간결한 메시지 또는 일부만 전달
+        # logger.error(f"ffmpeg failed: {e.stderr.decode(errors='ignore')}")
+        raise HTTPException(500, f"ffmpeg failed while merging: {e.stderr.decode(errors='ignore')[:500]}")
     finally:
-        # 임시 청크 정리
+        # 임시 청크 파일 정리
         for p in part_paths:
             try:
                 p.unlink(missing_ok=True)
             except Exception:
                 pass
+        # 임시 병합 목록 파일 정리
+        if concat_list_path:
+            concat_list_path.unlink(missing_ok=True)
+
+# ── React 앱 서빙 (Catch-all) ─────────────────────────────────────────────────
+# API 경로가 아닌 모든 GET 요청을 React의 index.html로 전달하여 클라이언트 사이드 라우팅 지원
+@app.get("/{full_path:path}")
+async def serve_react_app(full_path: str):
+    index_path = WEB_BUILD / "index.html"
+    if not index_path.exists():
+        raise HTTPException(status_code=404, detail="React app not built. Run `npm run build` in `web-react` directory.")
+    return FileResponse(index_path)
