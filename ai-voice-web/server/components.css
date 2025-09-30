@@ -1,0 +1,339 @@
+/* 버튼, 카드, 헤더, 푸터, 배너, 플레이어 등 컴포넌트별 스타일
+ */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, .85);
+    backdrop-filter: saturate(180%) blur(10px);
+    border-bottom: 1px solid var(--line);
+}
+
+.header-inner {
+    height: 56px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.brand {
+    font-weight: 800;
+    font-size: 18px;
+}
+
+.nav {
+    display: flex;
+    gap: 16px;
+    color: #4b5563;
+}
+
+.nav a.active {
+    color: var(--brand);
+    font-weight: 600;
+}
+
+.auth {
+    margin-left: auto;
+    display: flex;
+    gap: 12px;
+    color: #374151;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: #f9fafb;
+    cursor: pointer;
+}
+
+.btn.primary {
+    border-color: transparent;
+    background: var(--brand);
+    color: #fff;
+}
+
+.btn.ghost {
+    background: #fff;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+}
+
+.card h3 {
+    margin: 0 0 10px;
+    font-size: 15px;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+.row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pill {
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: #f3f4f6;
+    border: 1px solid var(--line);
+}
+
+.list {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+
+.list li a {
+    color: var(--brand);
+}
+
+.progress {
+    height: 8px;
+    background: #f3f4f6;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress>span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--brand);
+}
+
+.banner {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    border: 1px dashed var(--brand);
+    background: #eff6ff;
+}
+
+.banner .btn {
+    background: #fff;
+}
+
+.player {
+    width: 100%;
+    margin-top: 12px;
+}
+
+.player .top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.player .title, .title {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.expert-badge-list {
+    background-color: rgba(37, 99, 235, 0.1);
+    color: var(--brand);
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    margin-right: 8px;
+}
+
+.range {
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: #eef2ff;
+    outline: none;
+}
+
+.range::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--brand);
+    cursor: pointer;
+}
+
+.fab {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    z-index: 60;
+}
+
+.footer {
+    border-top: 1px solid var(--line);
+    padding: 24px 0;
+    color: #6b7280;
+}
+
+.grid {
+    display: grid;
+    gap: 16px;
+}
+
+.tab-group {
+    display: inline-flex;
+    background: #f3f4f6;
+    border-radius: 999px;
+    padding: 4px;
+}
+
+.tab {
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--muted);
+}
+
+.tab.active {
+    background: #fff;
+    color: var(--brand);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+
+
+
+/* 알람 */
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+ul#alarmList {
+    margin-top: 10px;
+    padding: 0;
+    list-style: none;
+}
+
+ul#alarmList li {
+    margin-bottom: 8px;
+    padding: 10px;
+    background-color: #f3f4f6;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn.delete {
+    background: #ff7777;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+}
+
+.btn.pin {
+    background: #60a5fa;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+}
+
+li.pinned {
+    background-color: #eff6ff;
+    border-left: 3px solid var(--brand);
+}
+
+
+
+
+
+/* 행동팁 */
+
+.behavior-slider {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+}
+
+.slide-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.slide-btn.prev {
+    left: 8px;
+}
+
+.slide-btn.next {
+    right: 8px;
+}
+
+.behavior-slider .slide-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    /* 이동 속도와 easing 조정 */
+}
+
+.behavior-slider .behavior-card {
+    flex: 0 0 100%;
+    /* 한 화면에 하나씩 */
+    box-sizing: border-box;
+    padding: 10px 40px; /* 좌우 여백 추가 */
+    text-align: center;
+}
+
+/* 기록표 */
+.record-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.record-table th, .record-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--line);
+}
+
+.record-table th {
+    font-weight: 600;
+    color: var(--muted);
+    background-color: #f9fafb;
+}
+
+.record-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.file-input-wrapper {
+    display: flex;
+    align-items: center;
+}
