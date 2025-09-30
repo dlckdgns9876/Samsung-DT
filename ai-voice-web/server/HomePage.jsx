@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from './AuthContext.jsx';
 import './base.css';
 import './components.css';
@@ -17,6 +17,7 @@ const HomePage = () => {
     const playerRef = useRef(null);
     const [growthRecords, setGrowthRecords] = useState([]);
     const growthChartRef = useRef(null);
+    const [posts, setPosts] = useState([]);
 
     // --- 알람 로직 시작 ---
     const fetchAlarms = async () => {
@@ -24,7 +25,7 @@ const HomePage = () => {
         try {
             const res = await fetch('/api/alarms', { headers: { 'x-auth-token': token } });
             const data = await res.json();
-            if (res.ok) setAlarms(data);
+            if (res.ok) setAlarms(data.map(a => ({...a, pinned: false }))); // pinned 상태 추가
         } catch (err) {
             console.error('Failed to fetch alarms:', err);
         }
@@ -45,6 +46,23 @@ const HomePage = () => {
         }
     }, [isAuthenticated, token]);
 
+    const rescheduleAlarm = async (alarm) => {
+        const currentAlarmTime = new Date(alarm.alarm_time.replace(' ', 'T'));
+        currentAlarmTime.setDate(currentAlarmTime.getDate() + 1);
+        const new_alarm_time = currentAlarmTime.toISOString().slice(0, 19).replace('T', ' ');
+
+        try {
+            await fetch(`/api/alarms/${alarm.alarm_id}/reschedule`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+                body: JSON.stringify({ new_alarm_time })
+            });
+            fetchAlarms();
+        } catch (err) {
+            console.error('Error rescheduling alarm:', err);
+        }
+    };
+
     useEffect(() => {
         const timeouts = alarms.map(alarm => {
             const alarmTime = new Date(alarm.alarm_time.replace(' ', 'T'));
@@ -53,6 +71,11 @@ const HomePage = () => {
             if (timeout > 0) {
                 return setTimeout(() => {
                     new Notification(alarm.title, { body: `설정한 시간입니다: ${alarm.alarm_time}` });
+                    if (alarm.pinned) {
+                        rescheduleAlarm(alarm);
+                    } else {
+                        deactivateAlarm(alarm.alarm_id);
+                    }
                 }, timeout);
             }
             return null;
@@ -93,10 +116,10 @@ const HomePage = () => {
             console.error("Failed to delete alarm", err);
         }
     };
-
-    const handlePinAlarm = async (alarm) => {
+    
+    const deactivateAlarm = async (id) => {
         try {
-            const res = await fetch(`/api/alarms/${alarm.alarm_id}/pin`, {
+            const res = await fetch(`/api/alarms/${id}/deactivate`, {
                 method: 'PUT',
                 headers: { 'x-auth-token': token },
             });
@@ -104,8 +127,15 @@ const HomePage = () => {
                 fetchAlarms();
             }
         } catch (err) {
-            console.error("Failed to pin alarm", err);
+            console.error("Failed to deactivate alarm", err);
         }
+    };
+
+    const togglePinAlarm = (alarm) => {
+        const updatedAlarms = alarms.map(a => 
+            a.alarm_id === alarm.alarm_id ? { ...a, pinned: !a.pinned } : a
+        );
+        setAlarms(updatedAlarms);
     };
 
     const formatAlarmTime = (dStr) => {
@@ -235,10 +265,23 @@ const HomePage = () => {
         });
     };
 
+    const fetchPosts = async () => {
+        try {
+            const res = await fetch('/api/posts');
+            const data = await res.json();
+            if (res.ok) {
+                setPosts(data.slice(0, 4)); // 최근 4개만 표시
+            }
+        } catch (err) {
+            console.error("Failed to fetch posts", err);
+        }
+    };
+
     useEffect(() => {
         if (isAuthenticated) {
             fetchBabies();
         }
+        fetchPosts();
         try {
             const raw = localStorage.getItem("growth_records_v1");
             if (raw) {
@@ -321,10 +364,24 @@ const HomePage = () => {
 
                 <div className="card" id="community">
                     <h3>커뮤니티 & 전문가 QnA</h3>
-                    <ul className="list">
-                        <li><a href="#">밤수 줄이는 팁</a></li>
-                        <li><a href="#">아토피 초기 대처</a></li>
-                    </ul>
+                    {posts.length > 0 ? (
+                        <table className="record-table table-striped">
+                            <tbody>
+                                {posts.map(post => (
+                                    <tr key={post.post_id}>
+                                        <td>
+                                            <Link to="/community" style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                                                <span className="post-title">{post.title.replace('[전문가] ', '')}</span>
+                                                <span className="post-nickname">{post.nickname}</span>
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <div className="muted">게시글이 없습니다.</div>
+                    )}
                 </div>
             </section>
             <section className="grid" style={{ gridTemplateColumns: '1fr 1fr 1fr', marginTop: '16px' }}>
@@ -342,7 +399,9 @@ const HomePage = () => {
                             <li key={alarm.alarm_id}>
                                 <span>{alarm.title} - {formatAlarmTime(alarm.alarm_time)}</span>
                                 <div style={{ display: 'flex', gap: '5px', flexShrink: 0 }}>
-                                    <button className="btn pin" onClick={() => handlePinAlarm(alarm)}>고정</button>
+                                    <button className="btn pin" onClick={() => togglePinAlarm(alarm)}>
+                                        {alarm.pinned ? '고정 해제' : '고정'}
+                                    </button>
                                     <button className="btn delete" onClick={() => deleteAlarm(alarm.alarm_id)}>삭제</button>
                                 </div>
                             </li>

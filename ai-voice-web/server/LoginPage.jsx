@@ -12,7 +12,7 @@ const LoginPage = () => {
     // 카카오 로그인 URL 생성
     const KAKAO_REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY; // .env 파일에서 키를 불러옵니다.
     // console.log(KAKAO_REST_API_KEY);
-    
+
     const redirectUri = `${window.location.origin}/kakao/callback`; // 프록시가 아닌 프론트엔드 라우트 경로로 변경
     const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${redirectUri}&response_type=code`;
     // const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?client_id=7d34118f4498bbd5f47ea0804d89ef21&redirect_uri=${redirectUri}&response_type=code`;
@@ -56,13 +56,16 @@ const LoginPage = () => {
                         <button type="submit" className="btn primary w-100">로그인</button>
                     </form>
 
-                    <div className="d-flex justify-content-center align-items-center w-100" style={{ gap: '1rem' }}>
+                    <div className="d-flex justify-content-center align-items-center w-100" style={{ display: 'flex', gap: '1rem' }}>
                         <a href={kakaoLoginUrl}>
                             <img src="/kakao_login.png" alt="카카오 로그인 버튼" style={{ height: '45px', width: 'auto' }} />
                         </a>
-                        <a href="#"><img src="/naver_login.png" alt="네이버 로그인 버튼" style={{height: '45px', width: 'auto'}}/></a>
-                        <a href="#"><img src="/google_login.png" alt="구글 로그인 버튼" style={{height: '45px', width: 'auto'}}/></a>
-                        <a href="#"><img src="/apple_login.png" alt="애플 로그인 버튼" style={{height: '45px', width: 'auto'}}/></a>
+                        <a href="#"><img src="/naver_login.png" alt="네이버 로그인 버튼" style={{ height: '45px', width: 'auto' }} /></a>
+                    </div>
+
+                    <div className="d-flex justify-content-center align-items-center w-100" style={{ display: 'flex', gap: '1rem' }}>
+                        <a href="#"><img src="/google_login.png" alt="구글 로그인 버튼" style={{ height: '45px', width: 'auto' }} /></a>
+                        <a href="#"><img src="/apple_login.png" alt="애플 로그인 버튼" style={{ height: '45px', width: 'auto' }} /></a>
                     </div>
                 </div>
             </div>
