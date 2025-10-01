@@ -4,6 +4,7 @@ import { AuthContext } from './AuthContext.jsx';
 import './base.css';
 import './components.css';
 import './tokens.css';
+import './styles/HomePage.css';
 
 const HomePage = () => {
     const navigate = useNavigate();
@@ -305,7 +306,7 @@ const HomePage = () => {
                  <section id="onboarding" className="card banner">
                     <div>👶 <strong>아기 프로필</strong>이 없습니다. 등록하면 개인화가 시작돼요.</div>
                     <div className="row" style={{marginLeft: 'auto'}}>
-                        <button className="btn" id="addBaby" onClick={() => navigate('/mypage')}>아기 등록</button>
+                        <button className="btn primary" id="addBaby" onClick={() => navigate('/mypage')}>아기 등록</button>
                     </div>
                 </section>
             )}
@@ -315,16 +316,16 @@ const HomePage = () => {
                     <section key={baby.baby_id} className="card" style={{marginBottom: '16px', display: 'flex', gap: '24px', alignItems: 'flex-start'}}>
                         <div style={{ flexShrink: 0, textAlign: 'center' }}>
                             {baby.profile_image_url ? (
-                                <img src={baby.profile_image_url} alt={`${baby.name} 프로필`} width="400" height="400" style={{ objectFit: 'cover', borderRadius: '10px' }} />
+                                <img src={baby.profile_image_url} alt={`${baby.name} 프로필`} className="baby-profile-image" />
                             ) : (
-                                <div className="d-flex justify-content-center align-items-center" style={{ width: 400, height: 400, backgroundColor: '#e5e7eb', borderRadius: '10px' }}>
-                                    <span className="text-white small" style={{color: '#6b7280'}}>사진없음</span>
+                                <div className="baby-profile-placeholder">
+                                    <span>사진없음</span>
                                 </div>
                             )}
                             <h2 style={{margin: '12px 0 0', fontSize: '24px'}}>{baby.name}</h2>
                         </div>
                         <div style={{ flexGrow: 1, border: '1px solid #e5e7eb', borderRadius: '16px', padding: '20px', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', fontSize: '16px', textAlign: 'center'}}>
+                            <div className="baby-info-grid">
                                 <div><strong>나이:</strong><br/>{calculateAge(baby.birthdate)}</div>
                                 <div><strong>성별:</strong><br/>{baby.gender}</div>
                                 <div><strong>생년월일:</strong><br/>{new Date(baby.birthdate).toISOString().split('T')[0]}</div>
@@ -337,9 +338,7 @@ const HomePage = () => {
                 <section className="card" style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px'}}>
                     <div>
                         <h2 style={{margin: '0 0 6px', fontSize: '28px', lineHeight: '1.2'}}>육아 초보를 위한 필수 홈</h2>
-                        <div className="muted">오늘 필요한 것 90%를 한 화면에서</div>
                     </div>
-                    <div className="pill muted" id="babyChip">아기: -</div>
                 </section>
             )}
 

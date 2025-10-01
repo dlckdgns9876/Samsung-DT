@@ -1,0 +1,162 @@
+/* HomePage.css */
+
+/* 전체적인 배경과 폰트 색상 */
+.container {
+    /* background-color: #eaf0f0; 더 진한 배경 */
+    color: #222;
+}
+
+/* 카드 스타일 */
+.card {
+    background-color: transparent;
+    border: 1px solid #c5d5d5; /* 더 진한 테두리 */
+    border-radius: 16px;
+    box-shadow: none;
+    transition: all 0.3s ease;
+    padding: 20px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(140, 160, 160, 0.25); /* 더 진한 그림자 */
+    background-color: #ffffff;
+}
+
+/* 헤더(네비게이션 바) 스타일 */
+.header {
+    background-color: #eaf0f0;
+    border-bottom: 1px solid #c5d5d5;
+    padding: 12px 0;
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand {
+    font-weight: bold;
+    font-size: 20px;
+    color: #405555; /* 더 진한 포인트 색상 */
+}
+
+.nav a {
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.nav a:hover, .nav a.active {
+    background-color: #d5e5e5;
+    color: #405555;
+}
+
+/* 헤더 및 제목 스타일 */
+h2, h3, h4 {
+    color: #405555;
+}
+
+/* 버튼 스타일 */
+.btn {
+    background-color: rgb(54, 173, 173); /* #36adad */
+    color: white !important;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.btn:hover {
+    background-color: rgb(83, 204, 204); /* #53cccc */
+}
+
+.btn.primary, .btn:not(.delete):not(.pin) {
+    background-color: rgb(54, 173, 173);
+    color: white;
+}
+
+.btn.primary:hover, .btn:not(.delete):not(.pin):hover {
+    background-color: rgb(83, 204, 204);
+}
+
+.btn.delete {
+    background-color: #d5e5e5;
+    color: #405555 !important;
+}
+
+.btn.delete:hover {
+    background-color: #c5d5d5;
+}
+
+.btn.pin {
+    background-color: #eaf0f0;
+    color: #405555 !important;
+}
+
+.btn.pin:hover {
+    background-color: #d5e5e5;
+}
+
+/* 슬라이더 버튼 */
+.slide-btn {
+    background-color: rgba(140, 176, 176, 0.5);
+    color: white;
+}
+
+/* 알람 리스트 */
+#alarmList li {
+    background-color: #f5fafa;
+    border-left: 4px solid #8ab0b0;
+}
+
+/* 커뮤니티 링크 */
+.post-title {
+    color: #222;
+    font-weight: 500;
+}
+.post-nickname {
+    color: #666;
+}
+a:hover .post-title {
+    color: #405555;
+}
+
+/* 아기 정보 */
+.baby-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.baby-info-grid div strong {
+    color: #405555;
+}
+
+.baby-profile-image {
+    width: 400px;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.baby-profile-placeholder {
+    width: 400px;
+    height: 400px;
+    background-color: #d5e5e5;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.baby-profile-placeholder span {
+    color: #405555;
+}
